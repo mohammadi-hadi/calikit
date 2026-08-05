@@ -1,0 +1,30 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Test
+        run: pytest -q
+      - name: CLI smoke test
+        run: |
+          calikit --version
+          calikit audit examples/preds.jsonl
+          calikit fit examples/preds.jsonl --method isotonic --json > /dev/null
+          calikit audit examples/judge_scores.jsonl --prob-key score --label-key human --rescale 1,10 --json > /dev/null
