@@ -180,6 +180,8 @@ what lands next: [GitHub Sponsors](https://github.com/sponsors/mohammadi-hadi).
 - [abeval](https://github.com/mohammadi-hadi/abeval) — error bars and paired
   significance tests for eval scores; calikit is about whether the
   probabilities behind them mean anything.
+- [rankkit](https://github.com/mohammadi-hadi/rankkit) — ranking evaluation
+  with error bars and position-bias correction for click logs.
 - [judgekit](https://github.com/mohammadi-hadi/judgekit) — audit LLM judge
   pipelines for bias.
 - [judgepanel](https://github.com/mohammadi-hadi/judgepanel) — estimate judge
