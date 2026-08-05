@@ -27,6 +27,7 @@ dev = ["pytest", "ruff", "build"]
 [project.urls]
 Homepage = "https://github.com/mohammadi-hadi/calikit"
 Explorer = "https://mohammadi.cv/calikit/"
+DOI = "https://doi.org/10.5281/zenodo.21808288"
 
 [project.scripts]
 calikit = "calikit.__main__:main"
