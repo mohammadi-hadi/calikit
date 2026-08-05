@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If calikit is useful in your work, please cite this repository."
+title: "calikit: calibration auditing for probabilistic predictions"
+type: software
+authors:
+  - family-names: Mohammadi
+    given-names: Hadi
+version: 0.1.0
+date-released: 2026-08-05
+doi: 10.5281/zenodo.21808288
+license: MIT
+repository-code: "https://github.com/mohammadi-hadi/calikit"
+url: "https://mohammadi.cv/calikit/"
+keywords:
+  - calibration
+  - reliability
+  - evaluation
+  - llm
+  - machine-learning
