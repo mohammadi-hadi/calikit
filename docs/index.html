@@ -1,0 +1,453 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>calikit — calibration explorer</title>
+<style>
+  :root {
+    --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e;
+    --muted: #898781; --grid: #e1e0d9; --accent: #2a78d6; --border: #e1e0d9;
+    --good: #2e7d43; --bad: #b3382c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7;
+      --muted: #898781; --grid: #2c2c2a; --accent: #3987e5; --border: #2c2c2a;
+      --good: #5dbb75; --bad: #e07b6f;
+    }
+  }
+  :root[data-theme="light"] {
+    --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e;
+    --muted: #898781; --grid: #e1e0d9; --accent: #2a78d6; --border: #e1e0d9;
+    --good: #2e7d43; --bad: #b3382c;
+  }
+  :root[data-theme="dark"] {
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7;
+    --muted: #898781; --grid: #2c2c2a; --accent: #3987e5; --border: #2c2c2a;
+    --good: #5dbb75; --bad: #e07b6f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  h1 { font-size: 1.7rem; margin: 0; }
+  .tag { color: var(--ink2); }
+  .theme-btn {
+    margin-left: auto; background: none; border: 1px solid var(--border);
+    color: var(--ink2); border-radius: 8px; padding: 4px 12px; cursor: pointer; font-size: .85rem;
+  }
+  .lede { color: var(--ink2); max-width: 64ch; }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px; margin-top: 18px;
+  }
+  label { font-size: .8rem; color: var(--ink2); display: block; margin-bottom: 4px; }
+  textarea {
+    width: 100%; height: 150px; resize: vertical; background: var(--page);
+    color: var(--ink); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px; font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .controls { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; margin-top: 12px; }
+  .controls input, .controls select {
+    background: var(--page); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 9px; font-size: .9rem; width: 110px;
+  }
+  .controls .grow { flex: 1; }
+  button.primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 9px 18px; font-size: .95rem; cursor: pointer;
+  }
+  button.ghost {
+    background: none; color: var(--accent); border: 1px solid var(--accent);
+    border-radius: 8px; padding: 8px 14px; font-size: .9rem; cursor: pointer;
+  }
+  .error { color: var(--bad); margin-top: 10px; font-size: .9rem; white-space: pre-wrap; }
+  .hero { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+  .hero .big { font-size: 3rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .hero .what { color: var(--ink2); max-width: 34ch; }
+  .verdict { font-weight: 600; }
+  .verdict.sig { color: var(--bad); }
+  .verdict.ok { color: var(--good); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; }
+  .tile { background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .tile .k { font-size: .75rem; color: var(--muted); }
+  .tile .v { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tile .s { font-size: .72rem; color: var(--muted); }
+  .chart-box { overflow-x: auto; margin-top: 8px; }
+  figure { margin: 0; }
+  figcaption { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); font-size: .85rem; }
+  th { color: var(--ink2); font-weight: 600; }
+  th:first-child, td:first-child { text-align: left; }
+  details { margin-top: 14px; }
+  summary { cursor: pointer; color: var(--ink2); font-size: .9rem; }
+  footer { margin-top: 40px; color: var(--muted); font-size: .85rem; }
+  footer a, .lede a, .what a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  code.pill {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 2px 8px; font-size: .85em;
+  }
+  svg text { font-family: system-ui, sans-serif; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>calikit</h1>
+    <span class="tag">calibration explorer</span>
+    <button class="theme-btn" id="themeBtn" type="button">dark / light</button>
+  </header>
+  <p class="lede">
+    Paste model predictions with outcomes and see whether the stated
+    probabilities can be trusted — reliability diagram, ECE, Brier score, and
+    a significance test, computed entirely in your browser. Same formulas as
+    the <a href="https://github.com/mohammadi-hadi/calikit">calikit</a> Python
+    package: <code class="pill">pip install calikit</code>
+  </p>
+
+  <div class="panel">
+    <label for="data">JSONL — one prediction per line, e.g. <code>{"p": 0.83, "y": 1}</code></label>
+    <textarea id="data" spellcheck="false"></textarea>
+    <div class="controls">
+      <div><label for="probKey">probability field</label><input id="probKey" value="p"></div>
+      <div><label for="labelKey">outcome field</label><input id="labelKey" value="y"></div>
+      <div><label for="rescale">rescale (LO,HI)</label><input id="rescale" placeholder="e.g. 1,10"></div>
+      <div><label for="bins">bins</label><input id="bins" type="number" min="2" max="30" value="10"></div>
+      <div><label for="scheme">binning</label>
+        <select id="scheme"><option value="mass">equal-mass</option><option value="width">equal-width</option></select>
+      </div>
+      <div class="grow"></div>
+      <button class="ghost" id="sampleBtn" type="button">Load sample</button>
+      <button class="primary" id="runBtn" type="button">Analyze</button>
+    </div>
+    <div class="error" id="error" hidden></div>
+  </div>
+
+  <div id="results" hidden>
+    <div class="panel hero">
+      <div>
+        <div class="big" id="heroEce">–</div>
+        <div class="tile-k" style="color: var(--muted); font-size: .8rem;">expected calibration error</div>
+      </div>
+      <div class="what">
+        <span class="verdict" id="verdict"></span>
+        <span id="verdictDetail"></span>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><div class="k">n items</div><div class="v" id="tN">–</div><div class="s" id="tBase"></div></div>
+      <div class="tile"><div class="k">Brier score</div><div class="v" id="tBrier">–</div><div class="s" id="tBrierRef"></div></div>
+      <div class="tile"><div class="k">log loss</div><div class="v" id="tLogLoss">–</div><div class="s">lower is better</div></div>
+      <div class="tile"><div class="k">AUC</div><div class="v" id="tAuc">–</div><div class="s">discrimination</div></div>
+      <div class="tile"><div class="k">MCE</div><div class="v" id="tMce">–</div><div class="s">worst bin gap</div></div>
+      <div class="tile"><div class="k">Spiegelhalter Z</div><div class="v" id="tZ">–</div><div class="s" id="tP"></div></div>
+    </div>
+
+    <div class="panel">
+      <figure>
+        <div class="chart-box" id="chart"></div>
+        <figcaption>Dots: mean confidence vs observed frequency per bin (hover for counts).
+        Dashed line: perfect calibration. Bars: items per bin.</figcaption>
+      </figure>
+      <details>
+        <summary>Bins table</summary>
+        <table id="binTable"></table>
+      </details>
+    </div>
+  </div>
+
+  <footer>
+    Get the same report (plus temperature / Platt / isotonic fitting and SVG
+    export) on the command line: <code class="pill">pip install calikit</code>
+    &nbsp;·&nbsp; <a href="https://github.com/mohammadi-hadi/calikit">GitHub</a>
+    &nbsp;·&nbsp; related:
+    <a href="https://github.com/mohammadi-hadi/abeval">abeval</a>,
+    <a href="https://github.com/mohammadi-hadi/judgekit">judgekit</a>,
+    <a href="https://github.com/mohammadi-hadi/judgepanel">judgepanel</a>
+  </footer>
+</div>
+
+<script>
+/* MATH-START — these functions mirror calikit's Python implementation.
+   Change them in both places or neither (parity-checked). */
+function binPredictions(probs, labels, k, scheme) {
+  const n = probs.length;
+  if (n === 0) throw new Error("no predictions to bin");
+  if (k < 2) throw new Error("need at least 2 bins");
+  let groups;
+  if (scheme === "width") {
+    groups = Array.from({ length: k }, () => []);
+    for (let i = 0; i < n; i++) groups[Math.min(k - 1, Math.floor(probs[i] * k))].push(i);
+  } else {
+    if (k > n) throw new Error("more bins (" + k + ") than items (" + n + ")");
+    const order = Array.from({ length: n }, (_, i) => i).sort((a, b) => probs[a] - probs[b]);
+    const base = Math.floor(n / k), rem = n % k;
+    groups = []; let start = 0;
+    for (let j = 0; j < k; j++) {
+      const size = base + (j < rem ? 1 : 0);
+      groups.push(order.slice(start, start + size));
+      start += size;
+    }
+  }
+  const bins = [];
+  groups.forEach((idx, j) => {
+    if (!idx.length) return;
+    const ps = idx.map(i => probs[i]), ys = idx.map(i => labels[i]);
+    const lo = scheme === "width" ? j / k : Math.min(...ps);
+    const hi = scheme === "width" ? (j + 1) / k : Math.max(...ps);
+    bins.push({
+      lo, hi, n: idx.length,
+      conf: ps.reduce((a, b) => a + b, 0) / ps.length,
+      acc: ys.reduce((a, b) => a + b, 0) / ys.length,
+    });
+  });
+  return bins;
+}
+function ece(bins) {
+  const n = bins.reduce((a, b) => a + b.n, 0);
+  return bins.reduce((a, b) => a + b.n * Math.abs(b.acc - b.conf), 0) / n;
+}
+function mce(bins) { return Math.max(...bins.map(b => Math.abs(b.acc - b.conf))); }
+function brier(probs, labels) {
+  return probs.reduce((a, p, i) => a + (p - labels[i]) ** 2, 0) / probs.length;
+}
+function logLoss(probs, labels) {
+  const eps = 1e-12;
+  let total = 0;
+  for (let i = 0; i < probs.length; i++) {
+    const p = Math.min(1 - eps, Math.max(eps, probs[i]));
+    total += labels[i] ? -Math.log(p) : -Math.log(1 - p);
+  }
+  return total / probs.length;
+}
+function auc(probs, labels) {
+  const nPos = labels.reduce((a, b) => a + b, 0), nNeg = labels.length - nPos;
+  if (nPos === 0 || nNeg === 0) return null;
+  const order = Array.from({ length: probs.length }, (_, i) => i).sort((a, b) => probs[a] - probs[b]);
+  const ranks = new Array(probs.length);
+  let i = 0;
+  while (i < order.length) {
+    let j = i;
+    while (j + 1 < order.length && probs[order[j + 1]] === probs[order[i]]) j++;
+    const avg = (i + j) / 2 + 1;
+    for (let t = i; t <= j; t++) ranks[order[t]] = avg;
+    i = j + 1;
+  }
+  let rankSumPos = 0;
+  for (let t = 0; t < labels.length; t++) if (labels[t]) rankSumPos += ranks[t];
+  return (rankSumPos - nPos * (nPos + 1) / 2) / (nPos * nNeg);
+}
+function erfc(x) {
+  const t = 1 / (1 + 0.5 * Math.abs(x));
+  const tau = t * Math.exp(-x * x - 1.26551223 + t * (1.00002368 + t * (0.37409196 +
+    t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 +
+    t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+  return x >= 0 ? tau : 2 - tau;
+}
+function spiegelhalter(probs, labels) {
+  let num = 0, variance = 0;
+  for (let i = 0; i < probs.length; i++) {
+    const p = probs[i];
+    num += (labels[i] - p) * (1 - 2 * p);
+    variance += (1 - 2 * p) ** 2 * p * (1 - p);
+  }
+  if (variance <= 0) return { z: 0, p: 1 };
+  const z = num / Math.sqrt(variance);
+  return { z, p: erfc(Math.abs(z) / Math.SQRT2) };
+}
+/* MATH-END */
+
+const SAMPLE = `{"id": "item-000", "p": 0.385977, "y": 1}
+{"id": "item-001", "p": 0.884435, "y": 0}
+{"id": "item-002", "p": 0.615673, "y": 1}
+{"id": "item-003", "p": 0.831462, "y": 1}
+{"id": "item-004", "p": 0.818463, "y": 1}
+{"id": "item-005", "p": 0.163997, "y": 0}
+{"id": "item-006", "p": 0.498385, "y": 0}
+{"id": "item-007", "p": 0.197342, "y": 1}
+{"id": "item-008", "p": 0.839467, "y": 1}
+{"id": "item-009", "p": 0.987955, "y": 1}
+{"id": "item-010", "p": 0.463596, "y": 1}
+{"id": "item-011", "p": 0.871236, "y": 1}
+{"id": "item-012", "p": 0.58071, "y": 0}
+{"id": "item-013", "p": 0.026233, "y": 1}
+{"id": "item-014", "p": 0.727477, "y": 1}
+{"id": "item-015", "p": 0.627045, "y": 1}
+{"id": "item-016", "p": 0.120401, "y": 0}
+{"id": "item-017", "p": 0.752387, "y": 0}
+{"id": "item-018", "p": 0.060431, "y": 1}
+{"id": "item-019", "p": 0.33174, "y": 1}
+{"id": "item-020", "p": 0.951228, "y": 1}
+{"id": "item-021", "p": 0.037938, "y": 0}
+{"id": "item-022", "p": 0.574378, "y": 1}
+{"id": "item-023", "p": 0.611045, "y": 0}
+{"id": "item-024", "p": 0.685574, "y": 1}
+{"id": "item-025", "p": 0.072539, "y": 0}
+{"id": "item-026", "p": 0.628053, "y": 0}
+{"id": "item-027", "p": 0.723537, "y": 0}
+{"id": "item-028", "p": 0.301133, "y": 0}
+{"id": "item-029", "p": 0.277473, "y": 1}
+{"id": "item-030", "p": 0.958014, "y": 1}
+{"id": "item-031", "p": 0.370076, "y": 1}
+{"id": "item-032", "p": 0.930938, "y": 0}
+{"id": "item-033", "p": 0.525918, "y": 0}
+{"id": "item-034", "p": 0.107029, "y": 1}
+{"id": "item-035", "p": 0.269301, "y": 0}
+{"id": "item-036", "p": 0.011552, "y": 0}
+{"id": "item-037", "p": 0.699458, "y": 1}
+{"id": "item-038", "p": 0.939636, "y": 1}
+{"id": "item-039", "p": 0.055669, "y": 1}
+{"id": "item-040", "p": 0.287466, "y": 0}
+{"id": "item-041", "p": 0.480782, "y": 1}
+{"id": "item-042", "p": 0.994199, "y": 1}
+{"id": "item-043", "p": 0.557061, "y": 1}
+{"id": "item-044", "p": 0.902605, "y": 1}
+{"id": "item-045", "p": 0.314715, "y": 0}
+{"id": "item-046", "p": 0.411456, "y": 1}
+{"id": "item-047", "p": 0.139811, "y": 0}
+{"id": "item-048", "p": 0.264937, "y": 0}
+{"id": "item-049", "p": 0.31455, "y": 1}
+{"id": "item-050", "p": 0.955302, "y": 1}
+{"id": "item-051", "p": 0.243858, "y": 1}
+{"id": "item-052", "p": 0.382259, "y": 1}
+{"id": "item-053", "p": 0.620646, "y": 0}
+{"id": "item-054", "p": 0.927656, "y": 0}
+{"id": "item-055", "p": 0.846984, "y": 1}
+{"id": "item-056", "p": 0.672986, "y": 0}
+{"id": "item-057", "p": 0.067523, "y": 0}
+{"id": "item-058", "p": 0.486224, "y": 1}
+{"id": "item-059", "p": 0.161905, "y": 0}`;
+
+function parseInput() {
+  const probKey = document.getElementById("probKey").value.trim() || "p";
+  const labelKey = document.getElementById("labelKey").value.trim() || "y";
+  const rescaleText = document.getElementById("rescale").value.trim();
+  let rescale = null;
+  if (rescaleText) {
+    const parts = rescaleText.split(",").map(Number);
+    if (parts.length !== 2 || parts.some(isNaN) || parts[1] <= parts[0])
+      throw new Error("rescale expects LO,HI with LO < HI (e.g. 1,10)");
+    rescale = parts;
+  }
+  const lines = document.getElementById("data").value.split("\n");
+  const probs = [], labels = [];
+  lines.forEach((line, idx) => {
+    line = line.trim();
+    if (!line) return;
+    let rec;
+    try { rec = JSON.parse(line); }
+    catch { throw new Error("line " + (idx + 1) + ": invalid JSON"); }
+    if (!(probKey in rec)) throw new Error("line " + (idx + 1) + ": missing field \"" + probKey + "\"");
+    if (!(labelKey in rec)) throw new Error("line " + (idx + 1) + ": missing field \"" + labelKey + "\"");
+    let p = rec[probKey];
+    const yRaw = rec[labelKey];
+    const y = yRaw === true ? 1 : yRaw === false ? 0 : yRaw;
+    if (typeof p !== "number") throw new Error("line " + (idx + 1) + ": \"" + probKey + "\" is not a number");
+    if (y !== 0 && y !== 1) throw new Error("line " + (idx + 1) + ": \"" + labelKey + "\" must be 0/1 or true/false");
+    if (rescale) {
+      if (p < rescale[0] || p > rescale[1])
+        throw new Error("line " + (idx + 1) + ": value " + p + " outside rescale range");
+      p = (p - rescale[0]) / (rescale[1] - rescale[0]);
+    }
+    if (p < 0 || p > 1)
+      throw new Error("line " + (idx + 1) + ": probability " + p + " outside [0, 1] — scores on another scale? set rescale");
+    probs.push(p); labels.push(y);
+  });
+  if (!probs.length) throw new Error("no records found");
+  return { probs, labels };
+}
+
+function fmt(x, d) { return x.toFixed(d === undefined ? 4 : d); }
+
+function drawChart(bins) {
+  const W = 640, H = 520, ML = 56, MR = 20, MT = 16, MB = 130, HIST = 64;
+  const PW = W - ML - MR, PH = H - MT - MB;
+  const X = v => ML + v * PW, Y = v => MT + (1 - v) * PH;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="Reliability diagram">`;
+  for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+    s += `<line x1="${X(0)}" y1="${Y(t)}" x2="${X(1)}" y2="${Y(t)}" stroke="var(--grid)" stroke-width="1"/>`;
+    s += `<text x="${X(0) - 8}" y="${Y(t) + 4}" font-size="11" fill="var(--muted)" text-anchor="end">${t}</text>`;
+    s += `<text x="${X(t)}" y="${Y(0) + 18}" font-size="11" fill="var(--muted)" text-anchor="middle">${t}</text>`;
+  }
+  s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(1)}" y2="${Y(1)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  s += `<text x="${X(0.76)}" y="${Y(0.82)}" font-size="11" fill="var(--muted)" transform="rotate(-33 ${X(0.76)} ${Y(0.82)})">perfect calibration</text>`;
+  for (const b of bins)
+    s += `<line x1="${X(b.conf)}" y1="${Y(b.conf)}" x2="${X(b.conf)}" y2="${Y(b.acc)}" stroke="var(--accent)" stroke-width="1.5" opacity="0.45"/>`;
+  for (const b of bins)
+    s += `<circle cx="${X(b.conf)}" cy="${Y(b.acc)}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"><title>conf ${fmt(b.conf, 3)}, observed ${fmt(b.acc, 3)}, n ${b.n}</title></circle>`;
+  s += `<text x="${ML + PW / 2}" y="${Y(0) + 38}" font-size="12" fill="var(--ink2)" text-anchor="middle">mean predicted probability</text>`;
+  s += `<text x="16" y="${MT + PH / 2}" font-size="12" fill="var(--ink2)" text-anchor="middle" transform="rotate(-90 16 ${MT + PH / 2})">observed frequency</text>`;
+  const histTop = H - HIST - 24, maxN = Math.max(...bins.map(b => b.n));
+  for (const b of bins) {
+    const h = (b.n / maxN) * (HIST - 14);
+    const bw = Math.max(3, (b.hi - b.lo) * PW - 2);
+    const cx = X((b.lo + b.hi) / 2);
+    s += `<rect x="${cx - bw / 2}" y="${histTop + (HIST - 14) - h}" width="${bw}" height="${h}" rx="2" fill="var(--muted)" opacity="0.5"><title>[${fmt(b.lo, 3)}, ${fmt(b.hi, 3)}]: ${b.n} items</title></rect>`;
+  }
+  s += `<text x="${ML}" y="${H - 6}" font-size="11" fill="var(--muted)">items per bin</text>`;
+  s += `</svg>`;
+  document.getElementById("chart").innerHTML = s;
+}
+
+function run() {
+  const errBox = document.getElementById("error");
+  errBox.hidden = true;
+  try {
+    const { probs, labels } = parseInput();
+    const k = Math.max(2, Math.min(30, parseInt(document.getElementById("bins").value, 10) || 10));
+    const scheme = document.getElementById("scheme").value;
+    const bins = binPredictions(probs, labels, k, scheme);
+    const e = ece(bins), m = mce(bins), b = brier(probs, labels), ll = logLoss(probs, labels);
+    const a = auc(probs, labels), sp = spiegelhalter(probs, labels);
+    const base = labels.reduce((x, y) => x + y, 0) / labels.length;
+    const sig = sp.p < 0.05;
+
+    document.getElementById("results").hidden = false;
+    document.getElementById("heroEce").textContent = fmt(e);
+    const v = document.getElementById("verdict");
+    v.textContent = sig ? "Miscalibration is statistically significant." : "No significant miscalibration detected.";
+    v.className = "verdict " + (sig ? "sig" : "ok");
+    document.getElementById("verdictDetail").textContent = sig
+      ? " Stated confidence is off by " + fmt(e * 100, 1) + " points on average — more than sampling noise explains (p " + (sp.p < 0.0001 ? "< 0.0001" : "= " + fmt(sp.p)) + ")."
+      : " The gaps in the diagram are within what sampling noise produces at n = " + probs.length + " (p = " + fmt(sp.p) + ").";
+    document.getElementById("tN").textContent = probs.length;
+    document.getElementById("tBase").textContent = "base rate " + fmt(base * 100, 1) + "%";
+    document.getElementById("tBrier").textContent = fmt(b);
+    document.getElementById("tBrierRef").textContent = "no-skill: " + fmt(base * (1 - base));
+    document.getElementById("tLogLoss").textContent = fmt(ll);
+    document.getElementById("tAuc").textContent = a === null ? "n/a" : fmt(a, 3);
+    document.getElementById("tMce").textContent = fmt(m);
+    document.getElementById("tZ").textContent = fmt(sp.z, 2);
+    document.getElementById("tP").textContent = "p " + (sp.p < 0.0001 ? "< 0.0001" : "= " + fmt(sp.p));
+    drawChart(bins);
+
+    const table = document.getElementById("binTable");
+    table.innerHTML = "<tr><th>bin range</th><th>n</th><th>mean confidence</th><th>observed</th><th>gap</th></tr>" +
+      bins.map(x => `<tr><td>[${fmt(x.lo, 3)}, ${fmt(x.hi, 3)}]</td><td>${x.n}</td><td>${fmt(x.conf, 3)}</td><td>${fmt(x.acc, 3)}</td><td>${fmt(x.acc - x.conf, 3)}</td></tr>`).join("");
+  } catch (err) {
+    errBox.textContent = err.message;
+    errBox.hidden = false;
+    document.getElementById("results").hidden = true;
+  }
+}
+
+document.getElementById("runBtn").addEventListener("click", run);
+document.getElementById("sampleBtn").addEventListener("click", () => {
+  document.getElementById("data").value = SAMPLE;
+  document.getElementById("probKey").value = "p";
+  document.getElementById("labelKey").value = "y";
+  document.getElementById("rescale").value = "";
+  run();
+});
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme === "dark" ||
+    (!root.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+  root.dataset.theme = dark ? "light" : "dark";
+});
+document.getElementById("data").value = SAMPLE;
+run();
+</script>
