@@ -182,8 +182,8 @@ what lands next: [GitHub Sponsors](https://github.com/sponsors/mohammadi-hadi).
 
 ## Related projects
 
-- [arenakit](https://github.com/mohammadi-hadi/arenakit) — audit a pairwise
-  model leaderboard before you trust its order.
+- [arenakit](https://github.com/mohammadi-hadi/arenakit) — Bradley-Terry
+  leaderboards with simultaneous confidence control.
 - [abeval](https://github.com/mohammadi-hadi/abeval) — error bars and paired
   significance tests for eval scores; calikit is about whether the
   probabilities behind them mean anything.
