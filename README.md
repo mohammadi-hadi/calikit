@@ -1,11 +1,16 @@
-# calikit
+<div align="center">
 
-Calibration auditing for probabilistic predictions.
+# calikit
 
 [![CI](https://github.com/mohammadi-hadi/calikit/actions/workflows/test.yml/badge.svg)](https://github.com/mohammadi-hadi/calikit/actions/workflows/test.yml)
 [![PyPI](https://img.shields.io/pypi/v/calikit)](https://pypi.org/project/calikit/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21808288.svg)](https://doi.org/10.5281/zenodo.21808288)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+*Calibration auditing for probabilistic predictions.*
+
+</div>
 
 A model that says "90%" should be right 9 times out of 10. Most aren't:
 modern classifiers — and LLM judges scoring on a 1–10 scale — are routinely
