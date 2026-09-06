@@ -185,21 +185,11 @@ what lands next: [GitHub Sponsors](https://github.com/sponsors/mohammadi-hadi).
 - Kernel ("smooth") ECE, which avoids the binning choice entirely.
 - Threshold guidance: expected cost curves once probabilities are calibrated.
 
-## Related projects
+## Part of evalstack
 
-- [arenakit](https://github.com/mohammadi-hadi/arenakit) — Bradley-Terry
-  leaderboards with simultaneous confidence control.
-- [abeval](https://github.com/mohammadi-hadi/abeval) — error bars and paired
-  significance tests for eval scores; calikit is about whether the
-  probabilities behind them mean anything.
-- [rankkit](https://github.com/mohammadi-hadi/rankkit) — ranking evaluation
-  with error bars and position-bias correction for click logs.
-- [judgekit](https://github.com/mohammadi-hadi/judgekit) — audit LLM judge
-  pipelines for bias.
-- [judgepanel](https://github.com/mohammadi-hadi/judgepanel) — estimate judge
-  accuracy without gold labels (Dawid–Skene).
-- [judgewatch](https://github.com/mohammadi-hadi/judgewatch) — monthly public
-  bias audits of LLM judges.
+[evalstack](https://github.com/mohammadi-hadi/evalstack) is the map of these
+eleven evaluation tools: what each one measures, what it found on real data,
+and the two chains that run end to end.
 
 ## Citing
 
