@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/calikit)](https://pypi.org/project/calikit/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21808288.svg)](https://doi.org/10.5281/zenodo.21808288)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/mohammadi-hadi/calikit/blob/main/LICENSE)
 
 *Calibration auditing for probabilistic predictions.*
 
@@ -60,7 +60,7 @@ Reading the report:
 Add `--svg reliability.svg` to get a publication-ready reliability diagram —
 this one is generated from the example data:
 
-![Reliability diagram for the example predictions](examples/reliability.svg)
+![Reliability diagram for the example predictions](https://raw.githubusercontent.com/mohammadi-hadi/calikit/main/examples/reliability.svg)
 
 ## Fix it
 
@@ -196,8 +196,8 @@ and the two chains that run end to end.
 Releases are archived on Zenodo. Cite the concept DOI
 [10.5281/zenodo.21808288](https://doi.org/10.5281/zenodo.21808288), which
 always resolves to the latest version; structured metadata is in
-[CITATION.cff](CITATION.cff).
+[CITATION.cff](https://github.com/mohammadi-hadi/calikit/blob/main/CITATION.cff).
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](https://github.com/mohammadi-hadi/calikit/blob/main/LICENSE).
