@@ -31,6 +31,7 @@ dev = ["pytest", "ruff", "build"]
 
 [project.urls]
 Homepage = "https://github.com/mohammadi-hadi/calikit"
+Issues = "https://github.com/mohammadi-hadi/calikit/issues"
 Explorer = "https://mohammadi.cv/calikit/"
 DOI = "https://doi.org/10.5281/zenodo.21808288"
 
