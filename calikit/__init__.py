@@ -7,7 +7,7 @@ from calikit.fit import Mapping, fit_isotonic, fit_platt, fit_temperature
 from calikit.metrics import auc, brier, decomposition, log_loss, normal_cdf, spiegelhalter
 from calikit.svg import reliability_svg, write_svg
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "Bin",
